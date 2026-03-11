@@ -277,6 +277,74 @@ bool LeptonSelection::apply(const Event& evt, Meta& meta, const Parameters& cfg)
 // Z Candidate Selection
 // -----------------------------------------------------------------------------
 
+// std::string ZCandidateSelection::name() const { return "ZCandidateSelection"; }
+// bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& cfg) {
+//     if (!evt.d) return false;
+
+//     // 1. Determine Z flavor (inverse of L1 flavor)
+//     int z_flav = (meta.l1flavor == ELECTRON) ? MUON : ELECTRON;
+
+//     // 2. L2 is GUARANTEED to be the first Z candidate 
+//     // (It is the only lepton in the triplet with the same sign as L1)
+//     int z1_idx = meta.l2_index;
+    
+//     // 3. Test L2 against L3 and L4 to find the best Z partner
+//     // We only need to check the OS candidates (L3, L4)
+//     int candidates[2] = {meta.l3_index, meta.l4_index};
+    
+//     int best_z2_idx  = -1;
+//     int h2_idx       = -1;
+//     int otherZ_idx   = -1; // The one NOT selected
+//     int otherH_idx   = -1; // The one NOT selected (for Higgs)
+//     double best_diff = 1e9;
+//     double best_mass = std::numeric_limits<double>::quiet_NaN();
+
+//     // Get L2 P4 once
+//     TLorentzVector p4_z1 = get_p4(evt, z1_idx, z_flav);
+
+//     for (int idx : candidates) {
+//         TLorentzVector p4_z2 = get_p4(evt, idx, z_flav);
+//         double mass = (p4_z1 + p4_z2).M();
+//         double diff = mass - cfg.z_mass;
+
+//         if (diff < cfg.z_mass_window_upper && diff > -cfg.z_mass_window_lower) {
+//             if (diff < best_diff) {
+//                 best_diff = diff;
+//                 best_mass = mass;
+//                 best_z2_idx = idx;
+//                 h2_idx = (idx == candidates[0]) ? candidates[1] : candidates[0];
+//                 // Alternative pair; this serves as check if our selection is correct
+//                 otherZ_idx = h2_idx; // swap
+//                 otherH_idx = idx;
+//             }
+//         }
+//     }
+
+//     if (best_z2_idx != -1) {
+//         meta.z_l1 = z1_idx;
+//         meta.z_l2 = best_z2_idx;
+//         meta.z_flavor = z_flav;
+//         meta.z_mass = best_mass;
+//         meta.z_mass_diff = best_diff;
+//         meta.otherZ_idx = otherZ_idx;
+//         meta.otherH_idx = otherH_idx;
+//         meta.h_e = (meta.l1flavor == ELECTRON) ? meta.l1_index : h2_idx;
+//         meta.h_mu = (meta.l1flavor == MUON) ? meta.l1_index : h2_idx;
+//         meta.h_e_pt = evt.d->Electron_PT[meta.h_e];
+//         meta.h_mu_pt = evt.d->Muon_PT[meta.h_mu];
+
+//         // Post-calculations
+//         compute_z_post_calculations(evt, meta, cfg);
+
+//         return true;
+//     }
+
+//     return false;
+// }
+
+// Hard coded for two signal regions [21, 81) and [81, 101) GeV
+// If two pairs fall within the two windows, assign the one in [81, 101] GeV as the Z candidate
+
 std::string ZCandidateSelection::name() const { return "ZCandidateSelection"; }
 bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& cfg) {
     if (!evt.d) return false;
@@ -299,6 +367,10 @@ bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& 
     double best_diff = 1e9;
     double best_mass = std::numeric_limits<double>::quiet_NaN();
 
+    bool use_window_21_81 = false;
+    if (cfg.z_mass == 81 && cfg.z_mass_window_lower == 60 && cfg.z_mass_window_upper == 0) {
+        use_window_21_81 = true;
+    }
     // Get L2 P4 once
     TLorentzVector p4_z1 = get_p4(evt, z1_idx, z_flav);
 
@@ -316,6 +388,15 @@ bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& 
                 // Alternative pair; this serves as check if our selection is correct
                 otherZ_idx = h2_idx; // swap
                 otherH_idx = idx;
+
+                if (use_window_21_81) {
+                    double alt_pair_mass = (p4_z1 + get_p4(evt, otherZ_idx, z_flav)).M();
+                    if (alt_pair_mass > 81.0 && alt_pair_mass < 101.0) {
+                        // If the alternative pair falls within the Z mass window, reject the event
+                        // debug print
+                        return false;
+                    }
+                }
             }
         }
     }
@@ -341,6 +422,7 @@ bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& 
 
     return false;
 }
+
 
 // -----------------------------------------------------------------------------
 // H -> Mu E selection (for mH < 150 GeV) (no MET in signal)
