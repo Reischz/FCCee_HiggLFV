@@ -59,6 +59,8 @@ BACKGROUNDS_NAMES = [
 RUN_SIGNALS = True
 RUN_BACKGROUNDS = True
 
+MASS_RANGE = range(110, 161, 5)  # for signals
+
 CONFIG = {
     "signal_mutaue_81To101": RUN_SIGNALS,
     "signal_etaumu_81To101": RUN_SIGNALS,
@@ -122,7 +124,7 @@ def build_jobs() -> List[Job]:
 
     # MuTauE signals
     if CONFIG["signal_mutaue_81To101"]:
-        for mass in range(110, 161, 5):
+        for mass in MASS_RANGE:
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
             jobs.append(Job(input_path=inp, output_dir=MUTAUE_81To101_DIR, pipeline=MUTAUE_81To101_PIPELINE,
                             sample_type="signal", channel="mutaue_81To101", name=f"signal_HMuTauE_LFV_{mass}"))
@@ -134,7 +136,7 @@ def build_jobs() -> List[Job]:
 
     # Etaumu signals
     if CONFIG["signal_etaumu_81To101"]:
-        for mass in range(110, 161, 5):
+        for mass in MASS_RANGE:
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
             jobs.append(Job(input_path=inp, output_dir=ETAUMU_81To101_DIR, pipeline=ETAUMU_81To101_PIPELINE,
                             sample_type="signal", channel="etaumu_81To101", name=f"signal_HETauMu_LFV_{mass}"))
@@ -145,7 +147,7 @@ def build_jobs() -> List[Job]:
 
     # MuTauE Offshell
     if CONFIG["signal_mutaue_21To81"]:
-        for mass in range(110, 161, 5):
+        for mass in MASS_RANGE:
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
             jobs.append(Job(input_path=inp, output_dir=MUTAUE_21To81_DIR, pipeline=MUTAUE_21To81_PIPELINE,
                             sample_type="signal", channel="mutaue_21To81", name=f"signal_HMuTauE_LFV_{mass}"))
@@ -156,7 +158,7 @@ def build_jobs() -> List[Job]:
 
     # Etaumu Offshell
     if CONFIG["signal_etaumu_21To81"]:
-        for mass in range(110, 161, 5):
+        for mass in MASS_RANGE:
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
             jobs.append(Job(input_path=inp, output_dir=ETAUMU_21To81_DIR, pipeline=ETAUMU_21To81_PIPELINE,
                             sample_type="signal", channel="etaumu_21To81", name=f"signal_HETauMu_LFV_{mass}"))
