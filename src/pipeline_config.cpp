@@ -214,11 +214,11 @@ std::vector<HistogramManager::VarSpec> Variables::getDefault() {
         [](const Event&, const Meta& m) -> double { return m.m_z2; }
     });
     vars.push_back({
-        "m_h1", "M_{H1} (GeV);M_{H1} [GeV];Events", 200, 0.5, 200.5,
+        "m_h1", "M_{H1} (GeV);M_{H1} [GeV];Events", 250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_h1; }
     });
     vars.push_back({
-        "m_h2", "M_{H2} (GeV);M_{H2} [GeV];Events", 200, 0.5, 200.5,
+        "m_h2", "M_{H2} (GeV);M_{H2} [GeV];Events", 250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_h2; }
     });
     vars.push_back({
@@ -253,18 +253,18 @@ std::vector<HistogramManager::VarSpec> Variables::getDefault() {
     // Recoil mass related variables
     // highest recoil mass pair
     vars.push_back({
-        "recoil_mass_1", "Recoil mass 1 (GeV);M_{recoil 1} [GeV];Events", 200, 0.5, 200.5,
+        "recoil_mass_1", "Recoil mass 1 (GeV);M_{recoil 1} [GeV];Events", 250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_recoil1; }
     });
     // second highest recoil mass pair
     vars.push_back({
-        "recoil_mass_2", "Recoil mass 2 (GeV);M_{recoil 2} [GeV];Events", 200, 0.5, 200.5,
+        "recoil_mass_2", "Recoil mass 2 (GeV);M_{recoil 2} [GeV];Events", 250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_recoil2; }
     });
 
     // invariant mass of 3 objects (2l from H + MET)
     vars.push_back({
-        "m_h_invariant", "Invariant mass of 3 objects (GeV);M_{H inv} [GeV];Events", 200, 0.5, 200.5,
+        "m_h_invariant", "Invariant mass of 3 objects (GeV);M_{H inv} [GeV];Events", 250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_h_invariant; }
     });
     vars.push_back({
@@ -281,15 +281,15 @@ std::vector<HistogramManager::Var2DSpec> Variables::getDefault2D() {
     // Example correlations using existing Meta fields
     vars2d.push_back({
         "mZ_vs_mH1", "M_{Z1} vs M_{H1};M_{Z1} [GeV];M_{H1} [GeV]",
-        100, 0.5, 200.5,
-        100, 0.5, 200.5,
+        100, 0.5, 250.5,
+        100, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_z1; },
         [](const Event&, const Meta& m) -> double { return m.m_h1; }
     });
     vars2d.push_back({
         "mZ2_vs_mH2", "M_{Z2} vs M_{H2};M_{Z2} [GeV];M_{H2} [GeV]",
-        100, 0.5, 200.5,
-        100, 0.5, 200.5,
+        100, 0.5, 250.5,
+        100, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_z2; },
         [](const Event&, const Meta& m) -> double { return m.m_h2; }
     });
@@ -305,84 +305,84 @@ std::vector<HistogramManager::Var2DSpec> Variables::getDefault2D() {
     vars2d.push_back({
         "h_mu_pt_vs_m_collinear", "p_{T}(#mu) vs M_{collinear};p_{T}(#mu) [GeV];M_{collinear} [GeV]",
         50, 0.0, 100.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_mu_pt; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_e_pt_vs_m_collinear", "p_{T}(e) vs M_{collinear};p_{T}(e) [GeV];M_{collinear} [GeV]",
         50, 0.0, 100.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_e_pt; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "dphi_e_met_vs_m_collinear", "|#Delta#phi(e,MET)| vs M_{collinear};|#Delta#phi(e,MET)|;M_{collinear} [GeV]",
         64, 0.0, 3.2,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.dphi_e_met; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "dphi_mu_met_vs_m_collinear", "|#Delta#phi(#mu,MET)| vs M_{collinear};|#Delta#phi(#mu,MET)|;M_{collinear} [GeV]",
         64, 0.0, 3.2,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.dphi_mu_met; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "dphi_mu_e_vs_m_collinear", "|#Delta#phi(#mu,e)| vs M_{collinear};|#Delta#phi(#mu,e)|;M_{collinear} [GeV]",
         64, 0.0, 3.2,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.dphi_mu_e; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "m_transverse_e_vs_m_collinear", "M_{T}(e) vs M_{collinear};M_{T}(e) [GeV];M_{collinear} [GeV]",
         120, 0.0, 120.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_transverse_e; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "m_transverse_mu_vs_m_collinear", "M_{T}(#mu) vs M_{collinear};M_{T}(#mu) [GeV];M_{collinear} [GeV]",
         120, 0.0, 120.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_transverse_mu; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "m_transverse_e_fine_vs_m_collinear", "M_{T}(e) fine vs M_{collinear};M_{T}(e) [GeV];M_{collinear} [GeV]",
         300, 0.01, 3.01,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_transverse_e; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "m_transverse_mu_fine_vs_m_collinear", "M_{T}(#mu) fine vs M_{collinear};M_{T}(#mu) [GeV];M_{collinear} [GeV]",
         300, 0.01, 3.01,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_transverse_mu; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "deltaR_mu_e_vs_m_collinear", "#DeltaR(#mu,e) vs M_{collinear};#DeltaR(#mu,e);M_{collinear} [GeV]",
         60, 0.0, 6.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.deltaR_mu_e; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_mu_boosted_pt_vs_m_collinear", "Boosted p_{T}(#mu) vs M_{collinear};p_{T}(#mu) [GeV];M_{collinear} [GeV]",
         50, 0.0, 100.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_mu_boosted_pt; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_e_boosted_pt_vs_m_collinear", "Boosted p_{T}(e) vs M_{collinear};p_{T}(e) [GeV];M_{collinear} [GeV]",
         50, 0.0, 100.0,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_e_boosted_pt; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
@@ -390,36 +390,36 @@ std::vector<HistogramManager::Var2DSpec> Variables::getDefault2D() {
     vars2d.push_back({
         "h_e_d0_vs_m_collinear", "|D0(e)| vs M_{collinear};|D0(e)| [Unknow Unit];M_{collinear} [GeV]",
         100, 0.0, 0.1,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_e_d0; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_e_dz_vs_m_collinear", "|DZ(e)| vs M_{collinear};|DZ(e)| [Unknow Unit];M_{collinear} [GeV]",
         100, 0.0, 0.5,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_e_dz; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_mu_d0_vs_m_collinear", "|D0(#mu)| vs M_{collinear};|D0(#mu)| [Unknow Unit];M_{collinear} [GeV]",
         100, 0.0, 0.1,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_mu_d0; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     vars2d.push_back({
         "h_mu_dz_vs_m_collinear", "|DZ(#mu)| vs M_{collinear};|DZ(#mu)| [Unknow Unit];M_{collinear} [GeV]",
         100, 0.0, 0.5,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.h_mu_dz; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });
     // recoil vs collinear mass
     vars2d.push_back({
         "m_recoil_vs_m_collinear", "M_{recoil} vs M_{collinear};M_{recoil} [GeV];M_{collinear} [GeV]",
-        200, 0.5, 200.5,
-        200, 0.5, 200.5,
+        250, 0.5, 250.5,
+        250, 0.5, 250.5,
         [](const Event&, const Meta& m) -> double { return m.m_recoil; },
         [](const Event&, const Meta& m) -> double { return m.m_collinear; }
     });

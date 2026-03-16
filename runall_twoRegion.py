@@ -23,19 +23,19 @@ from typing import List, Dict, Any
 PARALLEL = 4  # default parallel workers
 
 # Pipeline files
-MUTAUE_PIPELINE = "./pipeline_mutaue.json"
-ETAUMU_PIPELINE = "./pipeline_etaumu.json"
-MUTAUE_OFFSHELL_PIPELINE = "./pipeline_mutaue_Zoffshell.json"
-ETAUMU_OFFSHELL_PIPELINE = "./pipeline_etaumu_Zoffshell.json"
+MUTAUE_81To101_PIPELINE = "./pipeline_mutaue_81To101.json"
+ETAUMU_81To101_PIPELINE = "./pipeline_etaumu_81To101.json"
+MUTAUE_21To81_PIPELINE = "./pipeline_mutaue_21To81.json"
+ETAUMU_21To81_PIPELINE = "./pipeline_etaumu_21To81.json"
 
 # Save path
 PARENT_DIR = Path("./normal_cuts")
 
 # Place dummy
-MUTAUE_DIR = None
-ETAUMU_DIR = None
-MUTAUE_OFFSHELL_DIR = None
-ETAUMU_OFFSHELL_DIR = None
+MUTAUE_81To101_DIR = None
+ETAUMU_81To101_DIR = None
+MUTAUE_21To81_DIR = None
+ETAUMU_21To81_DIR = None
 
 # Backgrounds
 BACKGROUNDS = [
@@ -58,18 +58,16 @@ BACKGROUNDS_NAMES = [
 # Toggle which channels / types to include (set True/False)
 RUN_SIGNALS = True
 RUN_BACKGROUNDS = True
+
 CONFIG = {
-    "mutaue_signal": RUN_SIGNALS,
-    "etaumu_signal": RUN_SIGNALS,
-    
-    "mutaue_offshell_signal": RUN_SIGNALS,
-    "etaumu_offshell_signal": RUN_SIGNALS,
-    
-    "mutaue_background": RUN_BACKGROUNDS,
-    "etaumu_background": RUN_BACKGROUNDS,
-    
-    "mutaue_offshell_background": RUN_BACKGROUNDS,
-    "etaumu_offshell_background": RUN_BACKGROUNDS,
+    "signal_mutaue_81To101": RUN_SIGNALS,
+    "signal_etaumu_81To101": RUN_SIGNALS,
+    "signal_mutaue_21To81": RUN_SIGNALS,
+    "signal_etaumu_21To81": RUN_SIGNALS,
+    "background_mutaue_81To101": RUN_BACKGROUNDS,
+    "background_etaumu_81To101": RUN_BACKGROUNDS,
+    "background_mutaue_21To81": RUN_BACKGROUNDS,
+    "background_etaumu_21To81": RUN_BACKGROUNDS,
 }
 # -------------------------
 # End user-configurable
@@ -115,7 +113,7 @@ class Job:
 
 
 def ensure_dirs():
-    for d in (MUTAUE_DIR, ETAUMU_DIR, MUTAUE_OFFSHELL_DIR, ETAUMU_OFFSHELL_DIR):
+    for d in (MUTAUE_81To101_DIR, ETAUMU_81To101_DIR, MUTAUE_21To81_DIR, ETAUMU_21To81_DIR):
         d.mkdir(parents=True, exist_ok=True)
 
 
@@ -123,49 +121,49 @@ def build_jobs() -> List[Job]:
     jobs: List[Job] = []
 
     # MuTauE signals
-    if CONFIG["mutaue_signal"]:
-        for mass in range(110, 146, 5):
+    if CONFIG["signal_mutaue_81To101"]:
+        for mass in range(110, 161, 5):
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
-            jobs.append(Job(input_path=inp, output_dir=MUTAUE_DIR, pipeline=MUTAUE_PIPELINE,
-                            sample_type="signal", channel="mutaue", name=f"signal_HMuTauE_LFV_{mass}"))
+            jobs.append(Job(input_path=inp, output_dir=MUTAUE_81To101_DIR, pipeline=MUTAUE_81To101_PIPELINE,
+                            sample_type="signal", channel="mutaue_81To101", name=f"signal_HMuTauE_LFV_{mass}"))
         
-    if CONFIG["mutaue_background"]:
+    if CONFIG["background_mutaue_81To101"]:
         for bg in BACKGROUNDS:
-            jobs.append(Job(input_path=bg, output_dir=MUTAUE_DIR, pipeline=MUTAUE_PIPELINE,
-                            sample_type="background", channel="mutaue", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
+            jobs.append(Job(input_path=bg, output_dir=MUTAUE_81To101_DIR, pipeline=MUTAUE_81To101_PIPELINE,
+                            sample_type="background", channel="mutaue_81To101", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
 
     # Etaumu signals
-    if CONFIG["etaumu_signal"]:
-        for mass in range(110, 146, 5):
+    if CONFIG["signal_etaumu_81To101"]:
+        for mass in range(110, 161, 5):
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
-            jobs.append(Job(input_path=inp, output_dir=ETAUMU_DIR, pipeline=ETAUMU_PIPELINE,
-                            sample_type="signal", channel="etaumu", name=f"signal_HETauMu_LFV_{mass}"))
-    if CONFIG["etaumu_background"]:
+            jobs.append(Job(input_path=inp, output_dir=ETAUMU_81To101_DIR, pipeline=ETAUMU_81To101_PIPELINE,
+                            sample_type="signal", channel="etaumu_81To101", name=f"signal_HETauMu_LFV_{mass}"))
+    if CONFIG["background_etaumu_81To101"]:
         for bg in BACKGROUNDS:
-            jobs.append(Job(input_path=bg, output_dir=ETAUMU_DIR, pipeline=ETAUMU_PIPELINE,
-                            sample_type="background", channel="etaumu", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
+            jobs.append(Job(input_path=bg, output_dir=ETAUMU_81To101_DIR, pipeline=ETAUMU_81To101_PIPELINE,
+                            sample_type="background", channel="etaumu_81To101", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
 
     # MuTauE Offshell
-    if CONFIG["mutaue_offshell_signal"]:
-        for mass in range(150, 161, 5):
+    if CONFIG["signal_mutaue_21To81"]:
+        for mass in range(110, 161, 5):
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
-            jobs.append(Job(input_path=inp, output_dir=MUTAUE_OFFSHELL_DIR, pipeline=MUTAUE_OFFSHELL_PIPELINE,
-                            sample_type="signal", channel="mutaue_offshell", name=f"signal_HMuTauE_LFV_{mass}"))
-    if CONFIG["mutaue_offshell_background"]:
+            jobs.append(Job(input_path=inp, output_dir=MUTAUE_21To81_DIR, pipeline=MUTAUE_21To81_PIPELINE,
+                            sample_type="signal", channel="mutaue_21To81", name=f"signal_HMuTauE_LFV_{mass}"))
+    if CONFIG["background_mutaue_21To81"]:
         for bg in BACKGROUNDS:
-            jobs.append(Job(input_path=bg, output_dir=MUTAUE_OFFSHELL_DIR, pipeline=MUTAUE_OFFSHELL_PIPELINE,
-                            sample_type="background", channel="mutaue_offshell", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
+            jobs.append(Job(input_path=bg, output_dir=MUTAUE_21To81_DIR, pipeline=MUTAUE_21To81_PIPELINE,
+                            sample_type="background", channel="mutaue_21To81", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
 
     # Etaumu Offshell
-    if CONFIG["etaumu_offshell_signal"]:
-        for mass in range(150, 161, 5):
+    if CONFIG["signal_etaumu_21To81"]:
+        for mass in range(110, 161, 5):
             inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
-            jobs.append(Job(input_path=inp, output_dir=ETAUMU_OFFSHELL_DIR, pipeline=ETAUMU_OFFSHELL_PIPELINE,
-                            sample_type="signal", channel="etaumu_offshell", name=f"signal_HETauMu_LFV_{mass}"))
-    if CONFIG["etaumu_offshell_background"]:
+            jobs.append(Job(input_path=inp, output_dir=ETAUMU_21To81_DIR, pipeline=ETAUMU_21To81_PIPELINE,
+                            sample_type="signal", channel="etaumu_21To81", name=f"signal_HETauMu_LFV_{mass}"))
+    if CONFIG["background_etaumu_21To81"]:
         for bg in BACKGROUNDS:
-            jobs.append(Job(input_path=bg, output_dir=ETAUMU_OFFSHELL_DIR, pipeline=ETAUMU_OFFSHELL_PIPELINE,
-                            sample_type="background", channel="etaumu_offshell", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
+            jobs.append(Job(input_path=bg, output_dir=ETAUMU_21To81_DIR, pipeline=ETAUMU_21To81_PIPELINE,
+                            sample_type="background", channel="etaumu_21To81", name=BACKGROUNDS_NAMES[BACKGROUNDS.index(bg)]))
 
     return jobs
 
@@ -202,25 +200,25 @@ def run_makecard_commands(args, dry_run: bool = False):
     print("="*30)
 
     makecard_jobs: Dict[str, Any] = {
-        "mutaue": {
-            "in_dir": MUTAUE_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["mutaue_signal"] or CONFIG["mutaue_background"]
+        "mutaue_81To101": {
+            "in_dir": MUTAUE_81To101_DIR,
+            "out_dir": Path(f"{args.output_dir}/{MUTAUE_81To101_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_mutaue_81To101"] or CONFIG["background_mutaue_81To101"]
         },
-        "etaumu": {
-            "in_dir": ETAUMU_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{ETAUMU_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["etaumu_signal"] or CONFIG["etaumu_background"]
+        "etaumu_81To101": {
+            "in_dir": ETAUMU_81To101_DIR,
+            "out_dir": Path(f"{args.output_dir}/{ETAUMU_81To101_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_etaumu_81To101"] or CONFIG["background_etaumu_81To101"]
         },
-        "mutaue_offshell": {
-            "in_dir": MUTAUE_OFFSHELL_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_OFFSHELL_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["mutaue_offshell_signal"] or CONFIG["mutaue_offshell_background"]
+        "mutaue_21To81": {
+            "in_dir": MUTAUE_21To81_DIR,
+            "out_dir": Path(f"{args.output_dir}/{MUTAUE_21To81_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_mutaue_21To81"] or CONFIG["background_mutaue_21To81"]
         },
-        "etaumu_offshell": {
-            "in_dir": ETAUMU_OFFSHELL_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{ETAUMU_OFFSHELL_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["etaumu_offshell_signal"] or CONFIG["etaumu_offshell_background"]
+        "etaumu_21To81": {
+            "in_dir": ETAUMU_21To81_DIR,
+            "out_dir": Path(f"{args.output_dir}/{ETAUMU_21To81_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_etaumu_21To81"] or CONFIG["background_etaumu_21To81"]
         },
     }
 
@@ -280,25 +278,26 @@ def run_sbatch_commands(args):
     # Copy the datacards/run_limits.py and datacards/slurm_submit.slurm to each output directory
     script_files = ["datacards/run_limits.py", "datacards/slurm_submit.slurm"]
     makecard_jobs: Dict[str, Any] = {
-        "mutaue": {
-            "in_dir": MUTAUE_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["mutaue_signal"] or CONFIG["mutaue_background"]
+        "mutaue_81To101": {
+            "in_dir": MUTAUE_81To101_DIR,
+            # "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_81To101_DIR.name.replace('hist_', '')}"),
+            "out_dir": Path(f"{args.output_dir}/{MUTAUE_81To101_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_mutaue_81To101"] or CONFIG["background_mutaue_81To101"]
         },
-        "etaumu": {
-            "in_dir": ETAUMU_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{ETAUMU_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["etaumu_signal"] or CONFIG["etaumu_background"]
+        "etaumu_81To101": {
+            "in_dir": ETAUMU_81To101_DIR,
+            "out_dir": Path(f"{args.output_dir}/{ETAUMU_81To101_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_etaumu_81To101"] or CONFIG["background_etaumu_81To101"]
         },
-        "mutaue_offshell": {
-            "in_dir": MUTAUE_OFFSHELL_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_OFFSHELL_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["mutaue_offshell_signal"] or CONFIG["mutaue_offshell_background"]
+        "mutaue_21To81": {
+            "in_dir": MUTAUE_21To81_DIR,
+            "out_dir": Path(f"{args.output_dir}/{MUTAUE_21To81_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_mutaue_21To81"] or CONFIG["background_mutaue_21To81"]
         },
-        "etaumu_offshell": {
-            "in_dir": ETAUMU_OFFSHELL_DIR,
-            "out_dir": Path(f"{args.output_dir}/datacards_{ETAUMU_OFFSHELL_DIR.name.replace('_hist', '')}"),
-            "enabled": CONFIG["etaumu_offshell_signal"] or CONFIG["etaumu_offshell_background"]
+        "etaumu_21To81": {
+            "in_dir": ETAUMU_21To81_DIR,
+            "out_dir": Path(f"{args.output_dir}/{ETAUMU_21To81_DIR.name.replace('hist_', 'datacards_')}"),
+            "enabled": CONFIG["signal_etaumu_21To81"] or CONFIG["background_etaumu_21To81"]
         },
     }
     for name, params in makecard_jobs.items():
@@ -315,37 +314,37 @@ def run_sbatch_commands(args):
 
     # Copy THEN GO TO EACH DIRECTORY AND SUBMIT
     # THE SCRIPTS MUST BE USED IN THE SAME DIRECTORY
-    for name, params in makecard_jobs.items():
-        if not params["enabled"]:
-            continue
-        out_dir = params["out_dir"]
-        sbatch_script = out_dir / "slurm_submit.slurm"
-        if not sbatch_script.exists():
-            print(f"SBATCH script not found in {out_dir}, skipping sbatch submission.")
-            continue
+    # for name, params in makecard_jobs.items():
+    #     if not params["enabled"]:
+    #         continue
+    #     out_dir = params["out_dir"]
+    #     sbatch_script = out_dir / "slurm_submit.slurm"
+    #     if not sbatch_script.exists():
+    #         print(f"SBATCH script not found in {out_dir}, skipping sbatch submission.")
+    #         continue
         
-        # USE THE OS.CHDIR TO CHANGE DIRECTORY
-        current_dir = os.getcwd()
-        os.chdir(out_dir)
-        try:
-            cmd = ["sbatch", "slurm_submit.slurm"]
-            print(f"Submitting sbatch job in {out_dir}: CMD: {' '.join(cmd)}")
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            print(result.stdout)
-            if result.stderr:
-                print("--- STDERR ---")
-                print(result.stderr)
-            print(f"SBATCH submission for '{name}' completed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"ERROR: sbatch submission for '{name}' failed with exit code {e.returncode}.")
-            print("--- STDOUT ---")
-            print(e.stdout)
-            print("--- STDERR ---")
-            print(e.stderr)
-        except FileNotFoundError:
-            print("ERROR: 'sbatch' command not found. Make sure SLURM is installed and configured.")
-        finally:
-            os.chdir(current_dir)
+    #     # USE THE OS.CHDIR TO CHANGE DIRECTORY
+    #     current_dir = os.getcwd()
+    #     os.chdir(out_dir)
+    #     try:
+    #         cmd = ["sbatch", "slurm_submit.slurm"]
+    #         print(f"Submitting sbatch job in {out_dir}: CMD: {' '.join(cmd)}")
+    #         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    #         print(result.stdout)
+    #         if result.stderr:
+    #             print("--- STDERR ---")
+    #             print(result.stderr)
+    #         print(f"SBATCH submission for '{name}' completed successfully.")
+    #     except subprocess.CalledProcessError as e:
+    #         print(f"ERROR: sbatch submission for '{name}' failed with exit code {e.returncode}.")
+    #         print("--- STDOUT ---")
+    #         print(e.stdout)
+    #         print("--- STDERR ---")
+    #         print(e.stderr)
+    #     except FileNotFoundError:
+    #         print("ERROR: 'sbatch' command not found. Make sure SLURM is installed and configured.")
+    #     finally:
+    #         os.chdir(current_dir)
 
 
 def main():
@@ -361,11 +360,11 @@ def main():
 
     print("Output directory set to:", args.output_dir)
     # TOBE CLEAR: OVERRIDE THE GLOBAL PATHS HERE
-    global MUTAUE_DIR, ETAUMU_DIR, MUTAUE_OFFSHELL_DIR, ETAUMU_OFFSHELL_DIR
-    MUTAUE_DIR = Path(args.output_dir) / "mutaue_hist"
-    ETAUMU_DIR = Path(args.output_dir) / "etaumu_hist"
-    MUTAUE_OFFSHELL_DIR = Path(args.output_dir) / "mutaue_Zoffshell_hist"
-    ETAUMU_OFFSHELL_DIR = Path(args.output_dir) / "etaumu_Zoffshell_hist"
+    global MUTAUE_81To101_DIR, ETAUMU_81To101_DIR, MUTAUE_21To81_DIR, ETAUMU_21To81_DIR
+    MUTAUE_81To101_DIR = Path(args.output_dir) / "hist_mutaue_81To101"
+    ETAUMU_81To101_DIR = Path(args.output_dir) / "hist_etaumu_81To101"
+    MUTAUE_21To81_DIR = Path(args.output_dir) / "hist_mutaue_21To81"
+    ETAUMU_21To81_DIR = Path(args.output_dir) / "hist_etaumu_21To81"
 
     ensure_dirs()
     jobs = build_jobs()
@@ -406,7 +405,7 @@ def main():
                     failures.append((job, -1))
         
         
-        pipeline_files = [MUTAUE_PIPELINE, ETAUMU_PIPELINE, MUTAUE_OFFSHELL_PIPELINE, ETAUMU_OFFSHELL_PIPELINE]
+        pipeline_files = [MUTAUE_81To101_PIPELINE, ETAUMU_81To101_PIPELINE, MUTAUE_21To81_PIPELINE, ETAUMU_21To81_PIPELINE]
         for pf in pipeline_files:
             dest = Path(args.output_dir) / Path(pf).name
             try:
@@ -414,6 +413,15 @@ def main():
                 print(f"Copied {pf} to {dest}")
             except Exception as e:
                 print(f"Failed to copy {pf} to {dest}: {e}")
+
+    # Copy the datacards/merge_datacards.py to the parent output directory for later use
+    merge_script = "datacards/merge_datacards.py"
+    dest_merge = Path(args.output_dir) / Path(merge_script).name
+    try:
+        shutil.copy(merge_script, dest_merge)
+        print(f"Copied {merge_script} to {dest_merge}")
+    except Exception as e:
+        print(f"Failed to copy {merge_script} to {dest_merge}: {e}")
 
     if failures:
         print(f"\n{len(failures)} jobs failed. Check logs.")
@@ -426,8 +434,30 @@ def main():
         else:
             print("\nSkipping makecard step as requested.")
         
+        run_sbatch_commands(args)
+        
+        # Run the merge_datacards.py with the option --submit if args.skip_sbatch is False
+        cmd = ["python3", "merge_datacards.py"]
         if not args.skip_sbatch:
-            run_sbatch_commands(args)
+            cmd.append("--submit")
+        print("\nRunning merge_datacards.py with command:", " ".join(cmd))
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=args.output_dir)
+            print(result.stdout)
+            if result.stderr:
+                print("--- STDERR ---")
+                print(result.stderr)
+            print("merge_datacards.py completed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR: merge_datacards.py failed with exit code {e.returncode}.")
+            print("--- STDOUT ---")
+            print(e.stdout)
+            print("--- STDERR ---")
+            print(e.stderr)
+            sys.exit(4)
+        except FileNotFoundError:
+            print("ERROR: 'merge_datacards.py' not found. Make sure it is in the output directory.")
+            sys.exit(4)
 
 if __name__ == "__main__":
     main()

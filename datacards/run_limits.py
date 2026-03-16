@@ -94,6 +94,10 @@ def cleanup(status_dir):
                     mf.write(lf.read())
                     mf.write("\n\n")
         logger.info(f"Merged logs into {merged_log}")
+    # Remove other logs file (except merged.log)
+    for log_file in log_dir.glob("*.log"):
+        if log_file != merged_log:
+            log_file.unlink()
     shutil.rmtree(status_dir)
 
 def main():
