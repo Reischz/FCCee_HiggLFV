@@ -22,32 +22,64 @@ DEFAULT_CHANNEL = "bin1"
 DEFAULT_INITIAL_HIST_NAME = "00_Initial_n_muons"
 DEFAULT_FINAL_HIST_REGEX = r"^\d+_finalstate_nocut_m_collinear$"
 
-# Cross-sections in pb
-# signal_xsec = 1 / 1e6 # 1 ab for sigma(ee->ZH) x BR(H->LFV) = 1 ab (assumed)
-signal_xsec = 1000 / 1e6 # 1 fb for sigma(ee->ZH) x BR(H->LFV) = 1 ab (assumed)
+# --- Configuration ---
+JSON_PATH = "xsec_pb.json"
+SIGNAL_TYPE = "ZH"  # Options: "ZH" or "VBF"
+
 factors = {
-    'ZToLL': 0.03363 * 2,  # Z->ee + Z->mumu
+    'ZToLL': 0.03363 * 2,    # Z->ee + Z->mumu
     'TauToLep': 0.1782 * 1,  # tau->e + tau->mu (consider opposite flavor only)
 }
 
-for key in factors:
-    signal_xsec *= factors[key]
-
-cross_sections_pb = {
-    
-    'zz_ll_tautau': 5.79e-04,      # Z->ll, Z->tautau, tau -> muons/electrons (corrected + ISR)
-    'zh_ll_ww': 6.6e-05,           # Z->ll, H->WW, WW->lvlv (only one mu and one e) + ISR
-    'zh_ll_tautau': 7.39611e-05,       # Z->ll, H->tautau, tautau->muons/electrons (corrected + ISR)
-    'zww': 3.53e-06,          # Z->ll, W->lvlv + ISR
-    'vbs': 3.91e-06,          # vector boson scattering + ISR
+channel_map = {
+    "etau": "ETauMu",
+    "mutau": "MuTauE"
 }
 
-# Generate signal cross-sections (up to 240 GeV)
-for mass in range(165, 241, 5):
-    proc_name_mutau = f"HMuTauE_LFV_{mass}"
-    proc_name_etamu = f"HETauMu_LFV_{mass}"
-    cross_sections_pb[proc_name_mutau] = signal_xsec
-    cross_sections_pb[proc_name_etamu] = signal_xsec
+# --- Load JSON Data ---
+with open(JSON_PATH, "r") as jf:
+    all_xsecs = json.load(jf)
+
+cross_sections_pb = {}
+signal_xsec_pb = {}
+
+# --- Parse JSON ---
+for key, xsec in all_xsecs.items():
+    
+    # Identify if the key is a signal (starts with ZH_ or VBF_)
+    is_signal = key.startswith("ZH_") or key.startswith("VBF_")
+    
+    if is_signal:
+        # Only process if it matches the desired SIGNAL_TYPE, ignore the other
+        if key.startswith(SIGNAL_TYPE):
+            # re.search finds the channel and mass regardless of the prefix (ZH_ll_ or VBF_)
+            match = re.search(r"(etau|mutau)(\d+)", key)
+            
+            if match:
+                channel_raw, mass = match.groups()
+                channel_name = channel_map.get(channel_raw, channel_raw)
+                proc_name = f"H{channel_name}_LFV_{mass}"
+                
+                # Base scaling
+                scaled_xsec = xsec * factors['TauToLep']
+                
+                # Mass-dependent scaling
+                mass_int = int(mass)
+                if 110 <= mass_int <= 140:
+                    scaled_xsec *= 1e-4
+                elif 145 <= mass_int <= 195:
+                    scaled_xsec *= 1e-2
+                elif 200 <= mass_int <= 240:
+                    scaled_xsec *= 1.0
+                    
+                signal_xsec_pb[proc_name] = scaled_xsec
+    else:
+        # Treat all non-signal keys (zz_ll_tautau, zh_ll_ww, etc.) as backgrounds
+        cross_sections_pb[key] = xsec
+
+# Combine backgrounds and the parsed/scaled signals
+cross_sections_pb.update(signal_xsec_pb)
+
 
 # Uncertainties framework (editable)
 GLOBAL_UNC = {
@@ -55,13 +87,9 @@ GLOBAL_UNC = {
     "lumi": 1.02,
 }
 
-# For now we will create {"bkg_unc": 2.0} for each background.
 BACKGROUND_UNC_NAME = "bkg_unc"
 BACKGROUND_UNC_VALUE = 1.3 # 30% uncertainty on backgrounds
 
-"""
-For easier implementation
-"""
 UNCERTAINTIES = {
     "lumi": 1.02, # This indicate apply globally
     # "bkg_unc": 1.3,

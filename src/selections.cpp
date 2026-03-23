@@ -439,14 +439,14 @@ bool HToMuESelection::apply(const Event& evt, Meta& meta, const Parameters& cfg)
     int idx_e  = meta.h_e;
     // OS Check
     if (evt.d->Muon_Charge[idx_mu] * evt.d->Electron_Charge[idx_e] >= 0) {
-        std::cout << "HToMuESelection: Failed OS check between mu and e." << std::endl;
+        // std::cout << "HToMuESelection: Failed OS check between mu and e." << std::endl;
         return false;
     }
 
     // PT requirements
     if (evt.d->Muon_PT[idx_mu] < cfg.mu_pt_min || evt.d->Electron_PT[idx_e] < cfg.e_pt_min) {
-        std::cout << "HToMuESelection: Failed pT requirement. mu_pt=" << evt.d->Muon_PT[idx_mu] 
-                  << ", e_pt=" << evt.d->Electron_PT[idx_e] << std::endl;
+        // std::cout << "HToMuESelection: Failed pT requirement. mu_pt=" << evt.d->Muon_PT[idx_mu] 
+        //           << ", e_pt=" << evt.d->Electron_PT[idx_e] << std::endl;
         return false;
     }
 
@@ -467,13 +467,19 @@ bool HToMuESelection::apply(const Event& evt, Meta& meta, const Parameters& cfg)
     //     return false;
     // }
 
+    // MET cut < 10 GeV
+    if (evt.d->MissingET_MET[0] > 10.0) {
+        // std::cout << "HToMuESelection: Failed MET cut. MET=" << evt.d->MissingET_MET[0] << std::endl;
+        return false;
+    }
+
     // Invariant Mass of Higgs Candidate (mu + e)
     TLorentzVector p4_mu = get_p4(evt, idx_mu, MUON);
     TLorentzVector p4_e  = get_p4(evt, idx_e, ELECTRON);
 
     double m_h_inv = (p4_mu + p4_e).M();
     meta.m_h_invariant = m_h_inv;
-    if (m_h_inv < 75.0) return false;
+    // if (m_h_inv < 75.0) return false;
 
     return true;
 }

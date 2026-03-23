@@ -15,7 +15,7 @@ import concurrent.futures
 import argparse
 from dataclasses import dataclass
 import shutil
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 # -------------------------
 # User-configurable section
@@ -36,6 +36,7 @@ MUTAUE_81To101_DIR = None
 ETAUMU_81To101_DIR = None
 MUTAUE_21To81_DIR = None
 ETAUMU_21To81_DIR = None
+STATUS_DIR = None  # Will be set dynamically to be inside args.output_dir
 
 # Backgrounds
 BACKGROUNDS = [
@@ -59,7 +60,38 @@ BACKGROUNDS_NAMES = [
 RUN_SIGNALS = True
 RUN_BACKGROUNDS = True
 
-MASS_RANGE = range(110, 161, 5)  # for signals
+SIGNAL_TYPE = "ZH"  # ZH or VBF
+
+MASS_LOW = 110
+MASS_HIGH = 220
+STEP_SIZE = 5
+MASS_RANGE = range(MASS_LOW, MASS_HIGH + 1, STEP_SIZE)
+
+SIGNAL_PATHS = {
+    "mutaue_81To101": {},
+    "etaumu_81To101": {},
+    "mutaue_21To81": {},
+    "etaumu_21To81": {}
+}
+if SIGNAL_TYPE == "ZH":
+    # Init path (ZH)
+    for mass in MASS_RANGE:
+        SIGNAL_PATHS["mutaue_81To101"][mass] = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
+        SIGNAL_PATHS["etaumu_81To101"][mass] = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
+        SIGNAL_PATHS["mutaue_21To81"][mass] = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
+        SIGNAL_PATHS["etaumu_21To81"][mass] = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
+
+elif SIGNAL_TYPE == "VBF":
+    # VBF version
+    # f"/work/project/physics/vwachira/fcc-ee-higgs-lfv/delphes_outputs/mh{mass}_mutau/" (or etau)
+    for mass in MASS_RANGE:
+        SIGNAL_PATHS["mutaue_81To101"][mass] = f"/work/project/physics/vwachira/fcc-ee-higgs-lfv/delphes_outputs/mh{mass}_mutau/"
+        SIGNAL_PATHS["etaumu_81To101"][mass] = f"/work/project/physics/vwachira/fcc-ee-higgs-lfv/delphes_outputs/mh{mass}_etau/"
+        SIGNAL_PATHS["mutaue_21To81"][mass] = f"/work/project/physics/vwachira/fcc-ee-higgs-lfv/delphes_outputs/mh{mass}_mutau/"
+        SIGNAL_PATHS["etaumu_21To81"][mass] = f"/work/project/physics/vwachira/fcc-ee-higgs-lfv/delphes_outputs/mh{mass}_etau/"
+else:
+    print(f"Unknown SIGNAL_TYPE: {SIGNAL_TYPE}")
+    sys.exit(1)
 
 CONFIG = {
     "signal_mutaue_81To101": RUN_SIGNALS,
@@ -96,8 +128,6 @@ class Job:
             raise ValueError(f"Unknown sample_type: {self.sample_type}")
 
     def log_path(self) -> Path:
-        # return self.output_dir / f"{self.sample_type}_{Path(self.input_path).name}.txt"
-        # Use name if provided
         if self.sample_type == "signal":
             base_name = Path(self.input_path).stem if self.name is None else self.name
             return self.output_dir / f"{base_name}.log"
@@ -109,7 +139,6 @@ class Job:
             raise ValueError(f"Unknown sample_type: {self.sample_type}")
 
     def command(self) -> List[str]:
-        # root expects the analyze_pipeline.cpp(...) as a single argument
         cpp_arg = f'analyze_pipeline.cpp("{self.input_path}","{self.out_root()}","{self.pipeline}")'
         return ["root", "-l", "-b", "-q", cpp_arg]
 
@@ -119,13 +148,23 @@ def ensure_dirs():
         d.mkdir(parents=True, exist_ok=True)
 
 
+def update_job_status(job: Job, status: str):
+    """Updates the status file for a job by replacing the old status file with a new one."""
+    base_prefix = f"{job.channel}_{job.name}__."
+    # Remove any existing status files for this job
+    for f in STATUS_DIR.glob(f"{base_prefix}*"):
+        f.unlink(missing_ok=True)
+    # Create the new status file
+    (STATUS_DIR / f"{base_prefix}{status}").touch()
+
+
 def build_jobs() -> List[Job]:
     jobs: List[Job] = []
 
     # MuTauE signals
     if CONFIG["signal_mutaue_81To101"]:
         for mass in MASS_RANGE:
-            inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
+            inp = SIGNAL_PATHS["mutaue_81To101"].get(mass)
             jobs.append(Job(input_path=inp, output_dir=MUTAUE_81To101_DIR, pipeline=MUTAUE_81To101_PIPELINE,
                             sample_type="signal", channel="mutaue_81To101", name=f"signal_HMuTauE_LFV_{mass}"))
         
@@ -137,7 +176,7 @@ def build_jobs() -> List[Job]:
     # Etaumu signals
     if CONFIG["signal_etaumu_81To101"]:
         for mass in MASS_RANGE:
-            inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
+            inp = SIGNAL_PATHS["etaumu_81To101"].get(mass)
             jobs.append(Job(input_path=inp, output_dir=ETAUMU_81To101_DIR, pipeline=ETAUMU_81To101_PIPELINE,
                             sample_type="signal", channel="etaumu_81To101", name=f"signal_HETauMu_LFV_{mass}"))
     if CONFIG["background_etaumu_81To101"]:
@@ -148,7 +187,7 @@ def build_jobs() -> List[Job]:
     # MuTauE Offshell
     if CONFIG["signal_mutaue_21To81"]:
         for mass in MASS_RANGE:
-            inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HMuTauE_LFV/Hmass{mass}/ROOT/"
+            inp = SIGNAL_PATHS["mutaue_21To81"].get(mass)
             jobs.append(Job(input_path=inp, output_dir=MUTAUE_21To81_DIR, pipeline=MUTAUE_21To81_PIPELINE,
                             sample_type="signal", channel="mutaue_21To81", name=f"signal_HMuTauE_LFV_{mass}"))
     if CONFIG["background_mutaue_21To81"]:
@@ -159,7 +198,7 @@ def build_jobs() -> List[Job]:
     # Etaumu Offshell
     if CONFIG["signal_etaumu_21To81"]:
         for mass in MASS_RANGE:
-            inp = f"/work/project/physics/psriling/FCC/FCCee/ISR_HETauMu_LFV/Hmass{mass}/ROOT/"
+            inp = SIGNAL_PATHS["etaumu_21To81"].get(mass)
             jobs.append(Job(input_path=inp, output_dir=ETAUMU_21To81_DIR, pipeline=ETAUMU_21To81_PIPELINE,
                             sample_type="signal", channel="etaumu_21To81", name=f"signal_HETauMu_LFV_{mass}"))
     if CONFIG["background_etaumu_21To81"]:
@@ -170,30 +209,26 @@ def build_jobs() -> List[Job]:
     return jobs
 
 
-def run_job(job: Job, verbose_prefix: bool = True) -> int:
+def run_job(job: Job) -> Tuple[Job, int, str]:
+    """Runs a job, captures its output entirely, and manages its status."""
+    update_job_status(job, "running")
     job.output_dir.mkdir(parents=True, exist_ok=True)
     log_path = job.log_path()
     cmd = job.command()
 
-    # Start subprocess; capture stdout+stderr merged
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-
-    # Open log file
+    # Capture all output rather than streaming line by line to prevent terminal mess
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    
+    # Save captured output to the designated log file
     with open(log_path, "w", encoding="utf-8", errors="replace") as logf:
-        prefix = f"[{job.channel}/{job.sample_type}/{Path(job.input_path).name}] "
-        # Stream output: write both to file and to terminal with prefix
-        if proc.stdout is None:
-            return proc.wait()
-        for line in proc.stdout:
-            # write to terminal
-            try:
-                sys.stdout.write(prefix + line)
-                sys.stdout.flush()
-            except BrokenPipeError:
-                pass
-            # write to log
-            logf.write(line)
-        return proc.wait()
+        logf.write(proc.stdout)
+        if proc.stderr:
+            logf.write("\n--- STDERR ---\n")
+            logf.write(proc.stderr)
+
+    update_job_status(job, "done")
+    return job, proc.returncode, proc.stdout
+
 
 def run_makecard_commands(args, dry_run: bool = False):
     """Builds and runs the makecard.py commands for channels that were processed."""
@@ -250,7 +285,6 @@ def run_makecard_commands(args, dry_run: bool = False):
             continue
 
         try:
-            # Using subprocess.run for simpler commands
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             print(result.stdout)
             if result.stderr:
@@ -267,7 +301,6 @@ def run_makecard_commands(args, dry_run: bool = False):
         except FileNotFoundError:
             print("ERROR: 'makecard.py' not found. Make sure it is in the current directory.")
             failures += 1
-            # No point in trying other jobs if script is missing
             break
     
     if failures > 0:
@@ -277,12 +310,10 @@ def run_makecard_commands(args, dry_run: bool = False):
         print("\nAll makecard jobs completed successfully.")
         
 def run_sbatch_commands(args):
-    # Copy the datacards/run_limits.py and datacards/slurm_submit.slurm to each output directory
     script_files = ["datacards/run_limits.py", "datacards/slurm_submit.slurm"]
     makecard_jobs: Dict[str, Any] = {
         "mutaue_81To101": {
             "in_dir": MUTAUE_81To101_DIR,
-            # "out_dir": Path(f"{args.output_dir}/datacards_{MUTAUE_81To101_DIR.name.replace('hist_', '')}"),
             "out_dir": Path(f"{args.output_dir}/{MUTAUE_81To101_DIR.name.replace('hist_', 'datacards_')}"),
             "enabled": CONFIG["signal_mutaue_81To101"] or CONFIG["background_mutaue_81To101"]
         },
@@ -314,41 +345,6 @@ def run_sbatch_commands(args):
             except Exception as e:
                 print(f"Failed to copy {script} to {dest}: {e}")
 
-    # Copy THEN GO TO EACH DIRECTORY AND SUBMIT
-    # THE SCRIPTS MUST BE USED IN THE SAME DIRECTORY
-    # for name, params in makecard_jobs.items():
-    #     if not params["enabled"]:
-    #         continue
-    #     out_dir = params["out_dir"]
-    #     sbatch_script = out_dir / "slurm_submit.slurm"
-    #     if not sbatch_script.exists():
-    #         print(f"SBATCH script not found in {out_dir}, skipping sbatch submission.")
-    #         continue
-        
-    #     # USE THE OS.CHDIR TO CHANGE DIRECTORY
-    #     current_dir = os.getcwd()
-    #     os.chdir(out_dir)
-    #     try:
-    #         cmd = ["sbatch", "slurm_submit.slurm"]
-    #         print(f"Submitting sbatch job in {out_dir}: CMD: {' '.join(cmd)}")
-    #         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    #         print(result.stdout)
-    #         if result.stderr:
-    #             print("--- STDERR ---")
-    #             print(result.stderr)
-    #         print(f"SBATCH submission for '{name}' completed successfully.")
-    #     except subprocess.CalledProcessError as e:
-    #         print(f"ERROR: sbatch submission for '{name}' failed with exit code {e.returncode}.")
-    #         print("--- STDOUT ---")
-    #         print(e.stdout)
-    #         print("--- STDERR ---")
-    #         print(e.stderr)
-    #     except FileNotFoundError:
-    #         print("ERROR: 'sbatch' command not found. Make sure SLURM is installed and configured.")
-    #     finally:
-    #         os.chdir(current_dir)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Parallel runner for analyze_pipeline jobs")
     parser.add_argument("--output-dir", "-o", type=str, default=str(PARENT_DIR), help="parent output directory")
@@ -361,12 +357,16 @@ def main():
     args = parser.parse_args()
 
     print("Output directory set to:", args.output_dir)
-    # TOBE CLEAR: OVERRIDE THE GLOBAL PATHS HERE
-    global MUTAUE_81To101_DIR, ETAUMU_81To101_DIR, MUTAUE_21To81_DIR, ETAUMU_21To81_DIR
+    global MUTAUE_81To101_DIR, ETAUMU_81To101_DIR, MUTAUE_21To81_DIR, ETAUMU_21To81_DIR, STATUS_DIR
+    
+    # Set the directories based on the output directory
     MUTAUE_81To101_DIR = Path(args.output_dir) / "hist_mutaue_81To101"
     ETAUMU_81To101_DIR = Path(args.output_dir) / "hist_etaumu_81To101"
     MUTAUE_21To81_DIR = Path(args.output_dir) / "hist_mutaue_21To81"
     ETAUMU_21To81_DIR = Path(args.output_dir) / "hist_etaumu_21To81"
+    
+    # Move the status directory inside the target output directory
+    STATUS_DIR = Path(args.output_dir) / "status"
 
     ensure_dirs()
     jobs = build_jobs()
@@ -388,24 +388,45 @@ def main():
             run_makecard_commands(dry_run=True)
         return
 
-    # Run in ThreadPoolExecutor: subprocesses are external so threads are fine for IO.
     failures = []
     if not args.skip_run:
+        # Reset and initialize the status directory inside args.output_dir
+        if STATUS_DIR.exists():
+            shutil.rmtree(STATUS_DIR)
+        STATUS_DIR.mkdir(parents=True, exist_ok=True)
+        
+        for job in jobs:
+            update_job_status(job, "queue")
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.parallel) as exe:
             future_to_job = {exe.submit(run_job, job): job for job in jobs}
+            
             for fut in concurrent.futures.as_completed(future_to_job):
                 job = future_to_job[fut]
                 try:
-                    rc = fut.result()
+                    completed_job, rc, out_text = fut.result()
+                    
+                    # Calculate live status metrics
+                    n_queue = len(list(STATUS_DIR.glob("*.queue")))
+                    n_run = len(list(STATUS_DIR.glob("*.running")))
+                    n_done = len(list(STATUS_DIR.glob("*.done")))
+                    
+                    # Print formatted header and job output block
+                    print(f"\n{'='*75}")
+                    print(f"[Queue {n_queue}] [Running {n_run}] [Done {n_done}] --- Log for: {job.channel} | {job.name}")
+                    print(f"{'='*75}")
+                    print(out_text.strip())
+                    print(f"{'-'*75}")
+                    
                     if rc != 0:
-                        print(f"Job FAILED (rc={rc}): {job.input_path} -> see {job.log_path()}")
+                        print(f"-> Job FAILED (rc={rc}): {job.input_path} -> see {job.log_path()}")
                         failures.append((job, rc))
                     else:
-                        print(f"Job DONE: {job.input_path} -> {job.out_root()}")
+                        print(f"-> Job DONE: {job.input_path} -> {job.out_root()}")
+
                 except Exception as e:
                     print(f"Job EXCEPTION for {job.input_path}: {e}")
                     failures.append((job, -1))
-        
         
         pipeline_files = [MUTAUE_81To101_PIPELINE, ETAUMU_81To101_PIPELINE, MUTAUE_21To81_PIPELINE, ETAUMU_21To81_PIPELINE]
         for pf in pipeline_files:

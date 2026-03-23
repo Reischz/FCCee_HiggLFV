@@ -102,13 +102,15 @@ void analyze_pipeline(const char* inputPath = "samples/HMuTauE_LFV_125.root",
     // Print all Parameters used (in loop)
     printf("==== Analysis Parameters ====\n");
     for (const auto& p : {
+        std::make_pair("lepton_pt_min", params.lepton_pt_min),
         std::make_pair("z_mass", params.z_mass),
         std::make_pair("zl_pt_min", params.zl_pt_min),
         std::make_pair("z_mass_window_upper", params.z_mass_window_upper),
         std::make_pair("z_mass_window_lower", params.z_mass_window_lower),
         std::make_pair("mu_pt_min", params.mu_pt_min),
         std::make_pair("e_pt_min", params.e_pt_min),
-        std::make_pair("max_dphi_e_met", params.max_dphi_e_met)
+        std::make_pair("max_dphi_e_met", params.max_dphi_e_met),
+        std::make_pair("max_dphi_mu_met", params.max_dphi_mu_met)
     }) {
         printf("%-20s : %g\n", p.first, p.second);
     }
