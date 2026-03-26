@@ -485,6 +485,64 @@ bool HToMuESelection::apply(const Event& evt, Meta& meta, const Parameters& cfg)
 }
 
 // -----------------------------------------------------------------------------
+// H -> Mu E with PT selection first
+bool PT_ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& cfg) {
+    if (!evt.d) return false;
+    // evt.d delphes class pointer
+    // meta contains the calculated information
+    // cfg contains selection information
+    // l1 is the singleton, l2 is Z-prompt, l3,l4 are the triplet
+    // z_l1 is SCDF of l1flavor, z_l2 is the best Z prompt, z_flavor is their flavor
+    meta.z_flavor = (meta.l1flavor == ELECTRON) ? MUON : ELECTRON;
+    TLorentzVector h1_p4 = get_p4(evt, meta.l1_index, meta.l1flavor);
+    if (h1_p4.Pt() < (meta.l1flavor == ELECTRON ? cfg.e_pt_min : cfg.mu_pt_min)) {return false;}
+    TLorentzVector z1_p4 = get_p4(evt, meta.l2_index, meta.l2_flavor);
+    vector<TLorentzVector> z_candidates;
+    vector<float> z_candidate_masses;
+    vector<int> PhSp_21t81_candidateIdx, PhSp_81t101_candidateIdx;
+    z_candidates.push_back(get_p4(evt, meta.l3_index, meta.l3flavor));
+    z_candidates.push_back(get_p4(evt, meta.l4_index, meta.l4flavor));
+    z_candidate_masses.push_back((z1_p4 + z_candidates[0]).M());
+    z_candidate_masses.push_back((z1_p4 + z_candidates[1]).M());
+    bool use_window_21_81 = (cfg.z_mass == 81 && cfg.z_mass_window_lower == 60 && cfg.z_mass_window_upper == 0);
+    for (int vector_idx = 0; vector_idx < z_candidates.size(); vector_idx++) {
+        if (z_candidate_masses[vector_idx] > 81.0 && z_candidate_masses[vector_idx] < 101.0) {
+            if (use_window_21_81) return false; // If the alternative pair falls within the Z mass window, reject the event
+            PhSp_81t101_candidateIdx.push_back(vector_idx);
+        }
+        else if (z_candidate_masses[vector_idx] > 21.0 && z_candidate_masses[vector_idx] < 81.0) {
+            PhSp_21t81_candidateIdx.push_back(vector_idx);
+        }
+    }
+    float min_diff = 1e9;
+    for (int pair_idx : (use_window_21_81 ? PhSp_21t81_candidateIdx : PhSp_81t101_candidateIdx)) {
+        float diff = std::abs(z_candidate_masses[pair_idx] - cfg.z_mass);
+        if ((diff < min_diff) && (z_candidates[1-pair_idx].Pt() > cfg.z_pt_min)) {
+            min_diff = diff;
+            meta.otherZ_idx = (pair_idx == 0) ? meta.l4_index : meta.l3_index;
+            meta.otherH_idx = (pair_idx == 0) ? meta.l3_index : meta.l4_index;
+            meta.z_l1 = meta.l2_index;
+            meta.z_l2 = (pair_idx == 0) ? meta.l3_index : meta.l4_index;
+            meta.z_mass = z_candidate_masses[pair_idx];
+            meta.z_mass_diff = diff;
+            meta.h_mu = (meta.l1flavor == MUON) ? meta.l1_index : ((pair_idx == 0) ? meta.l3_index : meta.l4_index);
+            meta.h_e = (meta.l1flavor == ELECTRON) ? meta.l1_index : ((pair_idx == 0) ? meta.l3_index : meta.l4_index);
+            meta.h_mu_pt = evt.d->Muon_PT[meta.h_mu];
+            meta.h_e_pt = evt.d->Electron_PT[meta.h_e];
+            meta.m_z1 = z_candidate_masses[pair_idx];
+            meta.m_z2 = z_candidate_masses[1-pair_idx];
+            meta.m_h1 = (h1_p4+z_candidates[1-pair_idx]).M();
+            meta.m_h2 = (h1_p4+z_candidates[pair_idx]).M();
+            meta.mh_inva
+        }
+    }
+        // Check if the Z candidate leptons (L2 and the best Z partner) satisfy the pT requirements
+    
+
+    return true;
+}
+
+// -----------------------------------------------------------------------------
 // H candidate Selections (for mH > 150 GeV)
 // -----------------------------------------------------------------------------
 std::string HCandidateSelection::name() const { return "HCandidateSelection"; }

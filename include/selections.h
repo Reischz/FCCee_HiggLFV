@@ -30,6 +30,12 @@ struct ZCandidateSelection : public ISelection {
     bool apply(const Event& evt, Meta& meta, const Parameters& cfg) override;
 };
 
+
+struct PT_ZCandidateSelection : public ISelection {
+    std::string name() const override;
+    bool apply(const Event& evt, Meta& meta, const Parameters& cfg) override;
+};
+
 struct HToMuTauESelection : public ISelection {
     std::string name() const override;
     bool apply(const Event& evt, Meta& meta, const Parameters& cfg) override;

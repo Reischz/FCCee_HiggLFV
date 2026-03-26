@@ -17,3 +17,11 @@ analysis/
 junk/
 __pycache__/
 PythonTest.ipynb
+PlotYield.ipynb
+ReadROOT.ipynb
+sbatch.log
+include/selections.h
+prefit_histograms/*
+Selection_Results/*
+Upper_Limits/*
+Selection_Results_OLD/*
