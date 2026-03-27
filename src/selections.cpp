@@ -380,8 +380,8 @@ bool ZCandidateSelection::apply(const Event& evt, Meta& meta, const Parameters& 
         double diff = mass - cfg.z_mass;
 
         if (diff < cfg.z_mass_window_upper && diff > -cfg.z_mass_window_lower) {
-            if (diff < best_diff) {
-                best_diff = diff;
+            if (std::abs(diff) < best_diff) {
+                best_diff = std::abs(diff);
                 best_mass = mass;
                 best_z2_idx = idx;
                 h2_idx = (idx == candidates[0]) ? candidates[1] : candidates[0];
