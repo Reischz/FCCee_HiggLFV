@@ -2,26 +2,23 @@
 datacards/*.txt
 datacards/*.root
 datacards/*.out
-samples/
-outdir/
-out_plots_eeZH/
+*/
 *.root
 CutPython.py
 *.sh
 .vscode/
-outputs/
+!datacards_*/ --- IGNORE ---
+!include/
+!src/
+!datacards/ --- IGNORE ---
 datacards_*/
-HLFV_paper/
-temp/
-analysis/
-junk/
-__pycache__/
 PythonTest.ipynb
 PlotYield.ipynb
 ReadROOT.ipynb
-sbatch.log
 include/selections.h
-prefit_histograms/*
-Selection_Results/*
-Upper_Limits/*
-Selection_Results_OLD/*
+*.log
+*.txt
+*ACLiC*
+*.d
+*.so
+*.out

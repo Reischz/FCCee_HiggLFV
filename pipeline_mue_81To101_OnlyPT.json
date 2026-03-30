@@ -18,7 +18,7 @@
   "selections": [
     { "name": "lepton_selection",       "enabled": true },
 
-    { "name": "modified_z_candidate_selection",  "enabled": true },
+    { "name": "pt_z_candidate_selection",  "enabled": true },
 
     { "name": "H_to_mu_e",           "enabled": true },
 
