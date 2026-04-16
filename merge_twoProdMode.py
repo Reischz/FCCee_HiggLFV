@@ -4,11 +4,18 @@ import math
 
 # --- Configuration ---
 DATACARD_PATH = {
-    'ZH': '/work/project/escience/ruttho/FCCee_HiggLFV/ZH_110To220_integerBin_V1',
-    'VBF': '/work/project/escience/ruttho/tmptest/FCCee_HiggLFV/VBF_110To220_integerBin',
+    'ZH': '/work/project/escience/ruttho/FCCee_HiggLFV/ZH_110To220_integerBin',
+    'VBF': '/work/project/escience/ruttho/FCCee_HiggLFV/VBF_110To220_integerBin',
     # 'ggH': './ggH_...', # Easily expandable
 }
-OUTPUT_BASE = './Merged_ZH_VBF_110To220_V1'
+
+# DATACARD_PATH = {
+#     'ZH': '/work/project/escience/ruttho/FCCee_HiggLFV/ZH_110To220_integerBin_V1',
+#     'VBF': '/work/project/escience/ruttho/tmptest/FCCee_HiggLFV/VBF_110To220_integerBin/',
+#     # 'ggH': './ggH_...', # Easily expandable
+# }
+
+OUTPUT_BASE = './Merged_ZH_VBF_110To220'
 
 # --- Core Functions ---
 def align_columns(label, values, widths):

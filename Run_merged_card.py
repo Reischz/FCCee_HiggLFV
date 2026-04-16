@@ -3,7 +3,7 @@
 import os
 
 # Define the path to the directory containing the cards
-merged_card_dir = "Merged_ZH_VBF_110To220_V1"
+merged_card_dir = "Merged_ZH_VBF_110To220"
 process_list = os.listdir(merged_card_dir)
 for process in process_list:
     this_path = os.path.join(merged_card_dir, process)

@@ -22,3 +22,15 @@ include/selections.h
 *.d
 *.so
 *.out
+Create_EightSelection.py 
+MuE_run.py 
+all_final_acceptance.json 
+combine_upperlimit.py 
+compare_ETauMuSelection.py 
+compare_MuESelection.py 
+getresultdata.py 
+*NoPTMin.json 
+*OnlyPT.json 
+*PTthenMass.json 
+runall_twoRegion_MuE.py 
+runall_twoRegion_NEW.py
